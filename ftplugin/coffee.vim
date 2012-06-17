@@ -250,12 +250,6 @@ function! s:CoffeeLint(startline, endline, bang, args)
     " close quickfix
     exec "nnoremap <silent> <buffer> q :ccl<CR>"
 
-    " open in a new window
-    exec "nnoremap <silent> <buffer> o <C-W><CR>"
-
-    " preview
-    exec "nnoremap <silent> <buffer> go <CR><C-W><C-W>"
-
     redraw!
   else
     " no error, sweet!
@@ -264,9 +258,8 @@ function! s:CoffeeLint(startline, endline, bang, args)
     echo "coffeelint: Lint Free"
   end
 
-
   " Don't jump if there's a bang.
-  if !len(a:bang)
+  if len(a:bang)
     silent! cc 1
   endif
 endfunction
