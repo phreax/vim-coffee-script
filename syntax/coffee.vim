@@ -34,6 +34,10 @@ hi def link coffeeConditional Conditional
 syn match coffeeException /\<\%(try\|catch\|finally\)\>/ display
 hi def link coffeeException Exception
 
+syn match coffeeInclude /\<\%(require\)\>/ display
+hi def link coffeeInclude Include 
+
+
 syn match coffeeKeyword /\<\%(new\|in\|of\|by\|and\|or\|not\|is\|isnt\|class\|extends\|super\|do\)\>/
 \                       display
 " The `own` keyword is only a keyword after `for`.
@@ -52,7 +56,7 @@ hi def link coffeeExtendedOp coffeeOperator
 
 " This is separate from `coffeeExtendedOp` to help differentiate commas from
 " dots.
-syn match coffeeSpecialOp /[,;]/ display
+syn match coffeeSpecialOp /[;]/ display
 hi def link coffeeSpecialOp SpecialChar
 
 syn match coffeeBoolean /\<\%(true\|on\|yes\|false\|off\|no\)\>/ display
@@ -63,7 +67,7 @@ hi def link coffeeGlobal Type
 
 " A special variable
 syn match coffeeSpecialVar /\<\%(this\|prototype\|arguments\)\>/ display
-hi def link coffeeSpecialVar Special
+hi def link coffeeSpecialVar Function 
 
 " An @-variable
 syn match coffeeSpecialIdent /@\%(\I\i*\)\?/ display
@@ -79,7 +83,7 @@ hi def link coffeeConstant Constant
 
 " A variable name
 syn cluster coffeeIdentifier contains=coffeeSpecialVar,coffeeSpecialIdent,
-\                                     coffeeObject,coffeeConstant
+\                                     coffeeObject,coffeeConstant,coffeeBoolean
 
 " A non-interpolated string
 syn cluster coffeeBasicString contains=@Spell,coffeeEscape
@@ -180,7 +184,8 @@ if !exists("coffee_no_trailing_semicolon_error")
 endif
 
 " Ignore reserved words in dot accesses.
-syn match coffeeDotAccess /\.\@<!\.\s*\I\i*/he=s+1 contains=@coffeeIdentifier
+syn match coffeeDotAccess /\.\s*\I\i*/he=s+1 contains=@coffeeIdentifier
+syn match coffeeDotAccess /\.\s*\I\i*/he=s+1 contains=@coffeeBoolean
 hi def link coffeeDotAccess coffeeExtendedOp
 
 " Ignore reserved words in prototype accesses.
@@ -195,11 +200,23 @@ syn region coffeeBrackets matchgroup=coffeeBracket start=/\[/ end=/\]/
 syn region coffeeParens matchgroup=coffeeParen start=/(/ end=/)/
 \                       contains=@coffeeAll
 
+syn match coffeeFunctionOp /[-=]>/ contained
+syn match coffeeFunctionEmpty /()/ contained
+
+syn match  coffeeFunctionParameter	  /\h\w*/ contained
+syn region  coffeeFunctionParameterList start=/(/ end=/)\s*\%([-=]>\)/ oneline contains=coffeeFunctionParameter,coffeeFunctionOp,coffeeFunctionEmpty
+
+hi def link coffeeFunctionParameter Function
+hi def link coffeeFunctionEmpty Function
+hi def link coffeeFunctionOp Operator 
+
+
 " These are highlighted the same as commas since they tend to go together.
 hi def link coffeeBlock coffeeSpecialOp
-hi def link coffeeBracket coffeeBlock
-hi def link coffeeCurly coffeeBlock
-hi def link coffeeParen coffeeBlock
+hi def link coffeeBlock coffeeSpecialOp
+""hi def link coffeeBracket coffeeBlock
+""hi def link coffeeCurly coffeeBlock
+""hi def link coffeeParen coffeeBlock
 
 " This is used instead of TOP to keep things coffee-specific for good
 " embedding. `contained` groups aren't included.
