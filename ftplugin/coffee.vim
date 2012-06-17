@@ -239,8 +239,31 @@ function! s:CoffeeLint(startline, endline, bang, args)
 
     call add(qflist, {'bufnr': bufnr('%'), 'lnum': lnum, 'text': text})
   endfor
-
+    
   call setqflist(qflist, 'r')
+
+  if len(qflist) > 0
+
+    " has errors display quickfix win
+    botright copen
+
+    " close quickfix
+    exec "nnoremap <silent> <buffer> q :ccl<CR>"
+
+    " open in a new window
+    exec "nnoremap <silent> <buffer> o <C-W><CR>"
+
+    " preview
+    exec "nnoremap <silent> <buffer> go <CR><C-W><C-W>"
+
+    redraw!
+  else
+    " no error, sweet!
+    cclose
+    redraw!
+    echo "coffeelint: Lint Free"
+  end
+
 
   " Don't jump if there's a bang.
   if !len(a:bang)
