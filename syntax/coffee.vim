@@ -34,9 +34,16 @@ hi def link coffeeConditional Conditional
 syn match coffeeException /\<\%(try\|catch\|finally\)\>/ display
 hi def link coffeeException Exception
 
-syn match coffeeKeyword /\<\%(new\|in\|of\|by\|and\|or\|not\|is\|isnt\|class\|extends\|super\|do\)\>/
+syn match coffeeInclude /\<\%(require\)\>/ display
+hi def link coffeeInclude Include 
+
+
+syn match coffeeKeyword /\<\%(new\|in\|of\|by\|and\|or\|not\|is\|isnt\|extends\|super\|do\)\>/
 \                       display
 " The `own` keyword is only a keyword after `for`.
+syn match coffeeClass /\<\%(class\)\>/
+hi def link coffeeClass Define
+
 syn match coffeeKeyword /\<for\s\+own\>/ contained containedin=coffeeRepeat
 \                       display
 hi def link coffeeKeyword Keyword
@@ -52,8 +59,8 @@ hi def link coffeeExtendedOp coffeeOperator
 
 " This is separate from `coffeeExtendedOp` to help differentiate commas from
 " dots.
-syn match coffeeSpecialOp /[,;]/ display
-hi def link coffeeSpecialOp SpecialChar
+syn match coffeeSpecialChar /[;]/ display contained
+hi def link coffeeSpecialChar SpecialChar
 
 syn match coffeeBoolean /\<\%(true\|on\|yes\|false\|off\|no\)\>/ display
 hi def link coffeeBoolean Boolean
@@ -63,7 +70,7 @@ hi def link coffeeGlobal Type
 
 " A special variable
 syn match coffeeSpecialVar /\<\%(this\|prototype\|arguments\)\>/ display
-hi def link coffeeSpecialVar Special
+hi def link coffeeSpecialVar Function 
 
 " An @-variable
 syn match coffeeSpecialIdent /@\%(\I\i*\)\?/ display
@@ -79,19 +86,21 @@ hi def link coffeeConstant Constant
 
 " A variable name
 syn cluster coffeeIdentifier contains=coffeeSpecialVar,coffeeSpecialIdent,
-\                                     coffeeObject,coffeeConstant
+\                                     coffeeObject,coffeeConstant,coffeeBoolean
 
 " A non-interpolated string
 syn cluster coffeeBasicString contains=@Spell,coffeeEscape
 " An interpolated string
 syn cluster coffeeInterpString contains=@coffeeBasicString,coffeeInterp
 
+
 " Regular strings
-syn region coffeeString start=/"/ skip=/\\\\\|\\"/ end=/"/
-\                       contains=@coffeeInterpString
-syn region coffeeString start=/'/ skip=/\\\\\|\\'/ end=/'/
-\                       contains=@coffeeBasicString
+syn region coffeeString matchgroup=coffeeStringDelimiter start=/"/ skip=/\\\\\|\\"/ end=/"/
+\                       contains=@coffeeInterpString,coffeeSpecialChar
+syn region coffeeString matchgroup=coffeeStringDelimiter start=/'/ skip=/\\\\\|\\'/ end=/'/
+\                       contains=@coffeeBasicString,coffeeSpecialChar
 hi def link coffeeString String
+hi def link coffeeStringDelimiter Delimiter
 
 " A integer, including a leading plus or minus
 syn match coffeeNumber /\i\@<![-+]\?\d\+\%([eE][+-]\?\d\+\)\?/ display
@@ -180,7 +189,8 @@ if !exists("coffee_no_trailing_semicolon_error")
 endif
 
 " Ignore reserved words in dot accesses.
-syn match coffeeDotAccess /\.\@<!\.\s*\I\i*/he=s+1 contains=@coffeeIdentifier
+syn match coffeeDotAccess /\.\s*\I\i*/he=s+1 contains=@coffeeIdentifier
+syn match coffeeDotAccess /\.\s*\I\i*/he=s+1 contains=@coffeeBoolean
 hi def link coffeeDotAccess coffeeExtendedOp
 
 " Ignore reserved words in prototype accesses.
@@ -195,8 +205,22 @@ syn region coffeeBrackets matchgroup=coffeeBracket start=/\[/ end=/\]/
 syn region coffeeParens matchgroup=coffeeParen start=/(/ end=/)/
 \                       contains=@coffeeAll
 
+syn match coffeeClosureOp /[-=>]/ contained
+syn match coffeeClosureEmpty /()/ contained
+
+"syn cluster coffeeFunctionArgs contains=coffeeFunction,coffeeString,coffeeBoolean,coffeeNumber,coffeeRegex
+"syn region coffeeFunction matchgroup=coffeeFunctionParens start=/[\w\.]*(/ms=e end=/)/ms=s contains=@coffeeFunctionArgs
+"
+syn match  coffeeClosureArgs	  /[a-zA-Z@$_]\w*/ contained
+syn region  coffeeClosure start=/\([[a-zA-Z@$_]\w*\s*=\s*\)\?(/ end=/)\s*\%([-=]>\)/ oneline contains=coffeeClosureArgs,coffeeClosureOp,coffeeClosureEmpty keepend
+syn match  coffeeClosureNoArgs /[[a-zA-Z@$_]\w*\s*=\s*[-=]>/ oneline contains=coffeeClosureArgs,coffeeClosureOp
+
+hi def link coffeeClosureArgs Function
+hi def link coffeeClosureEmpty Function
+hi def link coffeeClosureOp Operator 
+
+
 " These are highlighted the same as commas since they tend to go together.
-hi def link coffeeBlock coffeeSpecialOp
 hi def link coffeeBracket coffeeBlock
 hi def link coffeeCurly coffeeBlock
 hi def link coffeeParen coffeeBlock
@@ -214,7 +238,7 @@ syn cluster coffeeAll contains=coffeeStatement,coffeeRepeat,coffeeConditional,
 \                              coffeeHeredoc,coffeeSpaceError,
 \                              coffeeSemicolonError,coffeeDotAccess,
 \                              coffeeProtoAccess,coffeeCurlies,coffeeBrackets,
-\                              coffeeParens
+\                              coffeeParens,coffeeFunction,coffeeStringDelimiter,coffeeClosure
 
 if !exists('b:current_syntax')
   let b:current_syntax = 'coffee'
