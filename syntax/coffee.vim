@@ -212,7 +212,7 @@ syn match coffeeClosureEmpty /()/ contained
 "syn region coffeeFunction matchgroup=coffeeFunctionParens start=/[\w\.]*(/ms=e end=/)/ms=s contains=@coffeeFunctionArgs
 "
 syn match  coffeeClosureArgs	  /[a-zA-Z@$_]\w*/ contained
-syn region  coffeeClosure start=/\([[a-zA-Z@$_]\w*\s*=\s*\)\?(/ end=/)\s*\%([-=]>\)/ oneline contains=coffeeClosureArgs,coffeeClosureOp,coffeeClosureEmpty keepend
+syn region  coffeeClosure start=/.*\zs\([[a-zA-Z@$_]\w*\s*=\s*\)\?(/ end=/)\s*\%([-=]>\)/ oneline contains=coffeeClosureArgs,coffeeClosureOp,coffeeClosureEmpty keepend 
 syn match  coffeeClosureNoArgs /[[a-zA-Z@$_]\w*\s*=\s*[-=]>/ oneline contains=coffeeClosureArgs,coffeeClosureOp
 
 hi def link coffeeClosureArgs Function
